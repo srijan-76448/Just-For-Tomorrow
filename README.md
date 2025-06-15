@@ -72,7 +72,7 @@ grandmother(GM, GC) :-
    * ?- grandparent(GP, mary).
    * ?- father(F, mary).
 
-##Graph Traversal: *BFS & DFS in Python*
+## Graph Traversal: *BFS & DFS in Python*
 This section provides Python implementations for two fundamental graph traversal algorithms: Breadth-First Search (BFS) and Depth-First Search (DFS).
 
 ### Problem Description
