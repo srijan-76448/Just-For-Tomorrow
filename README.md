@@ -172,7 +172,7 @@ This section presents a command-line Tic-Tac-Toe game implementation in Python f
 ### Problem Description
 Develop a two-player Tic-Tac-Toe game where players take turns marking cells on a 3x3 board. The game should detect wins (three in a row, column, or diagonal) and draws.
 
-### Program 
+### Program _Without AI_
 ```Python
 def print_board(board):
     """Prints the current state of the Tic-Tac-Toe board."""
@@ -250,6 +250,133 @@ def tic_tac_toe():
 if __name__ == "__main__":
     tic_tac_toe()
 ```
+
+### Program _With AI_
+```Python
+import random
+
+def print_board(board):
+    """Prints the current state of the Tic-Tac-Toe board."""
+    for i, row in enumerate(board):
+        print("|".join(row))
+        if i < 2:
+            print("-----")
+
+def check_win(board, player):
+    """Checks if the given player has won the game using comprehensions."""
+    # Check rows
+    if any(all(s == player for s in row) for row in board):
+        return True
+    # Check columns
+    if any(all(board[r][c] == player for r in range(3)) for c in range(3)):
+        return True
+    # Check main diagonal
+    if all(board[i][i] == player for i in range(3)):
+        return True
+    # Check anti-diagonal
+    if all(board[i][2 - i] == player for i in range(3)):
+        return True
+    return False
+
+def is_board_full(board):
+    """Checks if the board is completely filled using a generator expression."""
+    return all(cell != ' ' for row in board for cell in row)
+
+def get_empty_cells(board):
+    """Returns a list of (row, col) tuples for all empty cells."""
+    return [(r, c) for r in range(3) for c in range(3) if board[r][c] == ' ']
+
+def ai_move(board, ai_player, human_player):
+    """Determines the AI's move based on a simple strategy."""
+    empty_cells = get_empty_cells(board)
+
+    # 1. Check if AI can win
+    for r, c in empty_cells:
+        board[r][c] = ai_player
+        if check_win(board, ai_player):
+            return r, c
+        board[r][c] = ' ' # Undo move
+
+    # 2. Check if human can win and block
+    for r, c in empty_cells:
+        board[r][c] = human_player
+        if check_win(board, human_player):
+            board[r][c] = ' ' # Undo human's potential move
+            return r, c
+        board[r][c] = ' ' # Undo move
+
+    # 3. Take the center if available
+    if (1, 1) in empty_cells:
+        return 1, 1
+
+    # 4. Take a corner if available
+    corners = [(0, 0), (0, 2), (2, 0), (2, 2)]
+    available_corners = [cell for cell in empty_cells if cell in corners]
+    if available_corners:
+        return random.choice(available_corners)
+
+    # 5. Take any remaining side if available
+    sides = [(0, 1), (1, 0), (1, 2), (2, 1)]
+    available_sides = [cell for cell in empty_cells if cell in sides]
+    if available_sides:
+        return random.choice(available_sides)
+
+    # Fallback (should not be reached if board is not full)
+    return random.choice(empty_cells)
+
+
+def tic_tac_toe_vs_ai():
+    """Main function to run the Tic-Tac-Toe game against an AI."""
+    board = [[' ' for _ in range(3)] for _ in range(3)]
+    human_player = 'X'
+    ai_player = 'O'
+    current_player = human_player # Human goes first
+
+    print("Welcome to Tic-Tac-Toe (You vs AI)!")
+    print_board(board)
+
+    while True:
+        if current_player == human_player:
+            print(f"\nPlayer {human_player}'s turn.")
+            try:
+                row = int(input("Enter row (0, 1, 2): "))
+                col = int(input("Enter column (0, 1, 2): "))
+            except ValueError:
+                print("Invalid input. Please enter a number between 0 and 2.")
+                continue
+
+            if not (0 <= row <= 2 and 0 <= col <= 2):
+                print("Row or column out of bounds. Please enter values between 0 and 2.")
+                continue
+
+            if board[row][col] == ' ':
+                board[row][col] = human_player
+            else:
+                print("That cell is already taken. Please choose an empty cell.")
+                continue
+        else: # AI's turn
+            print(f"\nAI ({ai_player})'s turn...")
+            row, col = ai_move(board, ai_player, human_player)
+            board[row][col] = ai_player
+            print(f"AI chose ({row}, {col})")
+
+        print_board(board)
+
+        if check_win(board, current_player):
+            print(f"{current_player} wins! {'Congratulations!' if current_player == human_player else 'AI Wins!'}")
+            break
+        elif is_board_full(board):
+            print("It's a draw! The board is full.")
+            break
+
+        # Switch player
+        current_player = ai_player if current_player == human_player else human_player
+
+if __name__ == "__main__":
+    tic_tac_toe_vs_ai()
+
+```
+
 
 ### How to Run
  * Save the code as tic_tac_toe.py.
